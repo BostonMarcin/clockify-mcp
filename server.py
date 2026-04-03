@@ -116,6 +116,7 @@ async def start_timer(project_name: str, task_name: str) -> str:
             "start": now,
             "projectId": project["id"],
             "description": task_name,
+            "billable": True,
         },
     )
 
