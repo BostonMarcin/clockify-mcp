@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "clockify": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--with", "fastmcp",
+        "--with", "httpx",
+        "fastmcp",
+        "run",
+        "server.py"
+      ],
+      "env": {
+        "CLOCKIFY_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
