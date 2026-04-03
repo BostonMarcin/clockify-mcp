@@ -32,14 +32,21 @@ Add the following block to any project's `CLAUDE.md` to have Claude automaticall
 ```markdown
 # Clockify Time Tracking
 
-This project is covered by Clockify time tracking.
+This project is covered by Clockify time tracking (project: "<YOUR_PROJECT_NAME>").
 
 At the start of every conversation:
 1. Check if any timer is currently running in Clockify (use the `status` tool)
-2. If a timer IS running — tell me what's being tracked and ask if I want to continue with it or switch to something else
-3. If NO timer is running — ask me explicitly what task we should track time against before proceeding with any work
+2. If a timer IS running — decide whether the running task fits the current session:
+   - If it fits (same topic/area of work) — keep it running, no action needed
+   - If it doesn't fit — stop the current timer and start a new one (see below)
+3. If NO timer is running — start a new timer immediately (see below)
 
-Never skip this check. Always confirm before starting or stopping timers.
+When starting a new timer:
+- Decide on a short, descriptive task name based on what the user is asking to work on
+- Use the project name configured above
+- Start the timer without asking — just inform the user what you started
+
+Never skip the initial status check.
 ```
 
 ## Tech Stack
