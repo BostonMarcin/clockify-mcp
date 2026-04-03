@@ -62,21 +62,6 @@ async def _find_project(workspace_id: str, project_name: str) -> dict | None:
     return None
 
 
-async def _find_task(workspace_id: str, project_id: str, task_name: str) -> dict | None:
-    tasks = await _get(f"/workspaces/{workspace_id}/projects/{project_id}/tasks", params={"name": task_name})
-    for t in tasks:
-        if t["name"].lower() == task_name.lower():
-            return t
-    return None
-
-
-async def _create_task(workspace_id: str, project_id: str, task_name: str) -> dict:
-    return await _post(
-        f"/workspaces/{workspace_id}/projects/{project_id}/tasks",
-        {"name": task_name},
-    )
-
-
 async def _get_running_entry(workspace_id: str, user_id: str) -> dict | None:
     entries = await _get(
         f"/workspaces/{workspace_id}/user/{user_id}/time-entries",
@@ -101,11 +86,10 @@ async def _stop_entry(workspace_id: str, user_id: str) -> dict:
 @mcp.tool()
 async def start_timer(project_name: str, task_name: str) -> str:
     """Start tracking time on a task. If a timer is already running, it will be stopped first.
-    If the task doesn't exist under the project, it will be created automatically.
 
     Args:
         project_name: Name of the Clockify project
-        task_name: Name of the task to track time on
+        task_name: Name of the task to track time on (used as description)
     """
     workspace_id = await _get_workspace_id()
     user_id = await _get_user_id()
@@ -124,26 +108,18 @@ async def start_timer(project_name: str, task_name: str) -> str:
             f"Project '{project_name}' not found. Available projects can be listed with list_projects."
         )
 
-    # Find or create task
-    task = await _find_task(workspace_id, project["id"], task_name)
-    created_msg = ""
-    if not task:
-        task = await _create_task(workspace_id, project["id"], task_name)
-        created_msg = f"Created new task '{task_name}'. "
-
-    # Start timer
+    # Start timer with description only (no taskId — avoids ugly concatenated display)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     await _post(
         f"/workspaces/{workspace_id}/time-entries",
         {
             "start": now,
             "projectId": project["id"],
-            "taskId": task["id"],
             "description": task_name,
         },
     )
 
-    return f"{stopped_msg}{created_msg}Timer started on '{task_name}' in project '{project_name}'."
+    return f"{stopped_msg}Timer started on '{task_name}' in project '{project_name}'."
 
 
 @mcp.tool()
